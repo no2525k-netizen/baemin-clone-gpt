@@ -7,6 +7,8 @@
     adminStores: "dongne_admin_stores",
     adminMenus: "dongne_admin_menus",
     adminAuth: "dongne_admin_auth",
+    authUsers: "dongne_auth_users",
+    authUser: "dongne_auth_user",
   };
 
   const categories = ["전체", "한식", "분식", "치킨", "중식", "일식", "카페·디저트", "버거·피자"];
@@ -215,13 +217,8 @@
     menu("menu_49", "store_10", "공기밥", "따뜻한 흰쌀밥", 1000, 11),
   ];
 
-  const user = {
-    id: "user_1",
-    name: "홍길동",
-    nickname: "길동",
-    phone: "010-1234-5678",
-    address: "서울 마포구 동네로 24, 302호",
-  };
+  const guestUser = { id: "guest", name: "방문자", nickname: "방문자", email: "", username: "", birthDate: "", phone: "", address: "배달 주소를 등록해 주세요" };
+  let user = { ...guestUser };
 
   const baseCoupons = [
     {
@@ -278,6 +275,9 @@
     customStores: loadJson(STORAGE.adminStores, []),
     customMenus: loadJson(STORAGE.adminMenus, []),
     adminAuthed: loadJson(STORAGE.adminAuth, false),
+    authUsers: loadJson(STORAGE.authUsers, []),
+    authUser: loadJson(STORAGE.authUser, null),
+    afterLogin: "/my",
     activeCategory: "전체",
     search: "",
     selectedMenuId: null,
@@ -285,6 +285,8 @@
     riderProgress: {},
     keepSearchFocus: false,
   };
+
+  if (state.authUser) user = { ...guestUser, ...state.authUser };
 
   const timers = {
     loading: null,
@@ -1257,14 +1259,11 @@
   }
 
   function renderMy() {
+    if (!state.authUser) return renderLogin();
     const content = `
       <section class="profile-panel">
         <div class="avatar">${escapeHtml(user.nickname.slice(0, 1))}</div>
-        <div>
-          <h2>${escapeHtml(user.nickname)}님</h2>
-          <p>${escapeHtml(user.phone)}</p>
-          <p>${escapeHtml(user.address)}</p>
-        </div>
+        <div><h2>${escapeHtml(user.nickname)}님</h2><p>${escapeHtml(user.name)} · ${escapeHtml(user.username)}</p><p>${escapeHtml(user.email)}</p><p>${escapeHtml(user.birthDate || "생년월일 미등록")}</p></div>
       </section>
       <section class="menu-links">
         <button class="menu-link" type="button" data-action="ready-toast">주소 관리 <span>›</span></button>
@@ -1272,12 +1271,38 @@
         <button class="menu-link" type="button" data-action="nav" data-path="/coupons">쿠폰함 <span>›</span></button>
         <button class="menu-link" type="button" data-action="nav" data-path="/likes">찜한 가게 <span>›</span></button>
         <button class="menu-link" type="button" data-action="ready-toast">고객센터 <span>›</span></button>
-        <button class="menu-link" type="button" data-action="ready-toast">설정 <span>›</span></button>
-        <button class="menu-link" type="button" data-action="ready-toast">로그아웃 <span>›</span></button>
+        <button class="menu-link" type="button" data-action="logout">로그아웃 <span>›</span></button>
         <button class="menu-link" type="button" data-action="nav" data-path="/admin">관리자 <span>›</span></button>
-      </section>
-    `;
+      </section>`;
     return page({ title: "마이", showBack: false, tab: true, content });
+  }
+
+  function renderLogin() {
+    const content = '
+      <section class="auth-card"><div class="auth-brand"><div class="logo-mark">동</div><h2>동네배달에 오신 걸 환영해요</h2><p>아이디 또는 이메일로 로그인해 주세요.</p></div>
+      <form id="login-form" class="form-grid"><label class="auth-label">아이디 또는 이메일<input class="field" name="loginId" autocomplete="username" placeholder="아이디 또는 이메일" required /></label>
+      <label class="auth-label">비밀번호<input class="field" name="password" type="password" autocomplete="current-password" placeholder="비밀번호" required /></label>
+      <button class="primary-btn" type="submit">로그인</button></form>
+      <div class="auth-bottom"><span>아직 회원이 아니신가요?</span><button class="text-btn" type="button" data-action="nav" data-path="/signup">회원가입</button></div></section>';
+    return page({ title: "로그인", content });
+  }
+
+  function renderSignup() {
+    const today = new Date().toISOString().slice(0, 10);
+    const content = '
+      <section class="auth-card"><div class="auth-brand"><div class="logo-mark">동</div><h2>회원가입</h2><p>아래 정보를 입력해 계정을 만들어 주세요.</p></div>
+      <form id="signup-form" class="form-grid">
+      <label class="auth-label">이름<input class="field" name="name" autocomplete="name" placeholder="실명 입력" maxlength="30" required /></label>
+      <label class="auth-label">생년월일<input class="field" name="birthDate" type="date" autocomplete="bday" max="' + today + '" required /></label>
+      <label class="auth-label">이메일<input class="field" name="email" type="email" autocomplete="email" placeholder="example@email.com" required /></label>
+      <label class="auth-label">아이디<input class="field" name="username" autocomplete="username" placeholder="영문·숫자 4~20자" minlength="4" maxlength="20" pattern="[A-Za-z0-9_]{4,20}" required /></label>
+      <label class="auth-label">비밀번호<input class="field" name="password" type="password" autocomplete="new-password" placeholder="8자 이상 입력" minlength="8" required /></label>
+      <label class="auth-label">비밀번호 확인<input class="field" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="비밀번호 다시 입력" minlength="8" required /></label>
+      <label class="auth-label">닉네임<input class="field" name="nickname" placeholder="사이트에서 사용할 닉네임" maxlength="20" required /></label>
+      <label class="auth-agree"><input type="checkbox" name="agree" required /> 개인정보 수집 및 이용 안내를 확인했고 동의합니다.</label>
+      <button class="primary-btn" type="submit">회원가입 완료</button></form>
+      <div class="auth-bottom"><span>이미 계정이 있으신가요?</span><button class="text-btn" type="button" data-action="nav" data-path="/login">로그인</button></div></section>';
+    return page({ title: "회원가입", content });
   }
 
   function renderAdmin() {
@@ -1388,10 +1413,12 @@
       return;
     }
     if (path === "/") app.innerHTML = renderHome();
+    else if (path === "/login") app.innerHTML = renderLogin();
+    else if (path === "/signup") app.innerHTML = renderSignup();
     else if (path === "/cart") app.innerHTML = renderCart();
-    else if (path === "/coupons") app.innerHTML = renderCoupons();
-    else if (path === "/orders") app.innerHTML = renderOrders();
-    else if (path === "/likes") app.innerHTML = renderLikes();
+    else if (path === "/coupons") app.innerHTML = state.authUser ? renderCoupons() : renderLogin();
+    else if (path === "/orders") app.innerHTML = state.authUser ? renderOrders() : renderLogin();
+    else if (path === "/likes") app.innerHTML = state.authUser ? renderLikes() : renderLogin();
     else if (path === "/my") app.innerHTML = renderMy();
     else if (path === "/admin") app.innerHTML = renderAdmin();
     else if (parts[0] === "store" && parts[1]) app.innerHTML = renderStoreDetail(parts[1]);
@@ -1549,12 +1576,55 @@
     navigate("/cart");
   }
 
+  async function hashPassword(password, salt) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: encoder.encode(salt), iterations: 120000, hash: "SHA-256" }, key, 256);
+    return Array.from(new Uint8Array(bits), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function handleSignup(event) {
+    event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity()) return;
+    const data = new FormData(form); const name = String(data.get("name")).trim();
+    const birthDate = String(data.get("birthDate")); const email = String(data.get("email")).trim().toLowerCase();
+    const username = String(data.get("username")).trim().toLowerCase(); const password = String(data.get("password"));
+    const passwordConfirm = String(data.get("passwordConfirm")); const nickname = String(data.get("nickname")).trim();
+    if (password !== passwordConfirm) return showToast("비밀번호가 서로 달라요.");
+    if (new Date(birthDate) > new Date()) return showToast("생년월일을 확인해 주세요.");
+    if (state.authUsers.some((item) => item.username === username)) return showToast("이미 사용 중인 아이디예요.");
+    if (state.authUsers.some((item) => item.email === email)) return showToast("이미 가입된 이메일이에요.");
+    const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    const passwordHash = await hashPassword(password, salt);
+    const account = { id: "member_" + Date.now(), name, birthDate, email, username, nickname, salt, passwordHash, address: "배달 주소를 등록해 주세요", createdAt: new Date().toISOString() };
+    state.authUsers.push(account); saveJson(STORAGE.authUsers, state.authUsers);
+    state.authUser = account; saveJson(STORAGE.authUser, account); user = { ...guestUser, ...account };
+    showToast("회원가입이 완료됐어요."); navigate(state.afterLogin || "/my");
+  }
+
+  async function handleLogin(event) {
+    event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity()) return;
+    const data = new FormData(form); const loginId = String(data.get("loginId")).trim().toLowerCase();
+    const password = String(data.get("password")); const account = state.authUsers.find((item) => item.username === loginId || item.email === loginId);
+    if (!account || await hashPassword(password, account.salt) !== account.passwordHash) return showToast("아이디 또는 비밀번호를 확인해 주세요.");
+    state.authUser = account; saveJson(STORAGE.authUser, account); user = { ...guestUser, ...account };
+    showToast("로그인했어요."); navigate(state.afterLogin || "/my");
+  }
+
+  app.addEventListener("submit", (event) => {
+    if (event.target.id === "signup-form") handleSignup(event);
+    if (event.target.id === "login-form") handleLogin(event);
+  });
+
   app.addEventListener("click", (event) => {
     const target = event.target.closest("[data-action]");
     if (!target) return;
     const action = target.dataset.action;
 
-    if (action === "nav") navigate(target.dataset.path);
+    if (action === "nav") {
+      const path = target.dataset.path;
+      if (["/my", "/orders", "/coupons", "/likes"].includes(path) && !state.authUser) { state.afterLogin = path; navigate("/login"); }
+      else navigate(path);
+    }
     if (action === "back") goBack();
     if (action === "go-home") navigate("/");
     if (action === "go-orders") navigate("/orders");
@@ -1605,6 +1675,10 @@
     if (action === "reorder") restoreOrderToCart(target.dataset.id);
     if (action === "ready-toast") showToast("준비 중입니다.");
     if (action === "admin-login") adminLogin();
+    if (action === "logout") {
+      state.authUser = null; user = { ...guestUser }; localStorage.removeItem(STORAGE.authUser);
+      showToast("로그아웃했어요."); navigate("/login");
+    }
     if (action === "admin-add-store") addAdminStore();
     if (action === "admin-add-menu") addAdminMenu();
   });
