@@ -1667,6 +1667,7 @@
     if (action === "apply-coupon") applyCoupon(target.dataset.couponId);
     if (action === "remove-coupon") removeAppliedCoupon();
     if (action === "order-now") {
+      if (!state.authUser) { state.afterLogin = "/cart"; navigate("/login"); return; }
       const order = createOrderFromCart();
       if (!order) return;
       navigate(`/order/complete/${order.id}`);
