@@ -1278,30 +1278,39 @@
   }
 
   function renderLogin() {
-    const content = '
-      <section class="auth-card"><div class="auth-brand"><div class="logo-mark">동</div><h2>동네배달에 오신 걸 환영해요</h2><p>아이디 또는 이메일로 로그인해 주세요.</p></div>
-      <form id="login-form" class="form-grid"><label class="auth-label">아이디 또는 이메일<input class="field" name="loginId" autocomplete="username" placeholder="아이디 또는 이메일" required /></label>
-      <label class="auth-label">비밀번호<input class="field" name="password" type="password" autocomplete="current-password" placeholder="비밀번호" required /></label>
-      <button class="primary-btn" type="submit">로그인</button></form>
-      <div class="auth-bottom"><span>아직 회원이 아니신가요?</span><button class="text-btn" type="button" data-action="nav" data-path="/signup">회원가입</button></div></section>';
+    const content = `
+      <section class="auth-card">
+        <div class="auth-brand"><div class="logo-mark">동</div><h2>동네배달에 오신 걸 환영해요</h2><p>아이디 또는 이메일로 로그인해 주세요.</p></div>
+        <form id="login-form" class="form-grid">
+          <label class="auth-label">아이디 또는 이메일<input class="field" name="loginId" autocomplete="username" placeholder="아이디 또는 이메일" required /></label>
+          <label class="auth-label">비밀번호<input class="field" name="password" type="password" autocomplete="current-password" placeholder="비밀번호" required /></label>
+          <button class="primary-btn" type="submit">로그인</button>
+        </form>
+        <div class="auth-bottom"><span>아직 회원이 아니신가요?</span><button class="text-btn" type="button" data-action="nav" data-path="/signup">회원가입</button></div>
+      </section>
+    `;
     return page({ title: "로그인", content });
   }
 
   function renderSignup() {
     const today = new Date().toISOString().slice(0, 10);
-    const content = '
-      <section class="auth-card"><div class="auth-brand"><div class="logo-mark">동</div><h2>회원가입</h2><p>아래 정보를 입력해 계정을 만들어 주세요.</p></div>
-      <form id="signup-form" class="form-grid">
-      <label class="auth-label">이름<input class="field" name="name" autocomplete="name" placeholder="실명 입력" maxlength="30" required /></label>
-      <label class="auth-label">생년월일<input class="field" name="birthDate" type="date" autocomplete="bday" max="' + today + '" required /></label>
-      <label class="auth-label">이메일<input class="field" name="email" type="email" autocomplete="email" placeholder="example@email.com" required /></label>
-      <label class="auth-label">아이디<input class="field" name="username" autocomplete="username" placeholder="영문·숫자 4~20자" minlength="4" maxlength="20" pattern="[A-Za-z0-9_]{4,20}" required /></label>
-      <label class="auth-label">비밀번호<input class="field" name="password" type="password" autocomplete="new-password" placeholder="8자 이상 입력" minlength="8" required /></label>
-      <label class="auth-label">비밀번호 확인<input class="field" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="비밀번호 다시 입력" minlength="8" required /></label>
-      <label class="auth-label">닉네임<input class="field" name="nickname" placeholder="사이트에서 사용할 닉네임" maxlength="20" required /></label>
-      <label class="auth-agree"><input type="checkbox" name="agree" required /> 개인정보 수집 및 이용 안내를 확인했고 동의합니다.</label>
-      <button class="primary-btn" type="submit">회원가입 완료</button></form>
-      <div class="auth-bottom"><span>이미 계정이 있으신가요?</span><button class="text-btn" type="button" data-action="nav" data-path="/login">로그인</button></div></section>';
+    const content = `
+      <section class="auth-card">
+        <div class="auth-brand"><div class="logo-mark">동</div><h2>회원가입</h2><p>아래 정보를 입력해 계정을 만들어 주세요.</p></div>
+        <form id="signup-form" class="form-grid">
+          <label class="auth-label">이름<input class="field" name="name" autocomplete="name" placeholder="실명 입력" maxlength="30" required /></label>
+          <label class="auth-label">생년월일<input class="field" name="birthDate" type="date" autocomplete="bday" max="${today}" required /></label>
+          <label class="auth-label">이메일<input class="field" name="email" type="email" autocomplete="email" placeholder="example@email.com" required /></label>
+          <label class="auth-label">아이디<input class="field" name="username" autocomplete="username" placeholder="영문·숫자 4~20자" minlength="4" maxlength="20" pattern="[A-Za-z0-9_]{4,20}" required /></label>
+          <label class="auth-label">비밀번호<input class="field" name="password" type="password" autocomplete="new-password" placeholder="8자 이상 입력" minlength="8" required /></label>
+          <label class="auth-label">비밀번호 확인<input class="field" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="비밀번호 다시 입력" minlength="8" required /></label>
+          <label class="auth-label">닉네임<input class="field" name="nickname" placeholder="사이트에서 사용할 닉네임" maxlength="20" required /></label>
+          <label class="auth-agree"><input type="checkbox" name="agree" required /> 개인정보 수집 및 이용 안내를 확인했고 동의합니다.</label>
+          <button class="primary-btn" type="submit">회원가입 완료</button>
+        </form>
+        <div class="auth-bottom"><span>이미 계정이 있으신가요?</span><button class="text-btn" type="button" data-action="nav" data-path="/login">로그인</button></div>
+      </section>
+    `;
     return page({ title: "회원가입", content });
   }
 
